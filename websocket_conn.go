@@ -16,26 +16,26 @@ var (
 	logger = logrus.WithField("service", "bitstamp").WithField("module", "wsconn")
 )
 
-// WSConn драйвер для получения OrderBook с бирж, работащих с WebSocket
+// WSConn driver for receiving Order Book from exchanges working with WebSocket
 type WSConn struct {
 	conn     *websocket.Conn
 	readerCh chan []byte
 }
 
-// NewWSConn создает новый экземпляр *WebSocket
+// NewWSConn creates a new *WebSocket instance
 func NewWSConn(conn *websocket.Conn) *WSConn {
 	return &WSConn{
 		conn: conn,
 	}
 }
 
-// keepalive отправляет ping сообщения, чтобы поддерживать websocket connection
+// keepalive sends ping messages to maintain websocket connection
 func (ws *WSConn) keepalive(close chan struct{}) {
-	// создать тикер, чтобы каждые PingFrequency секунд отправлять ping-сообщения
+	// create a ticker to send ping messages every PingFrequency seconds
 	tk := time.NewTicker(PingFrequency)
 	defer tk.Stop()
 
-	// если в ответ прислали pong, то обновляется deadline connection'a
+	// if pong was sent in response, then the connection's deadline is updated
 	ws.conn.SetPongHandler(func(appData string) error {
 		logger.Debug("got pong message")
 		if err := ws.conn.SetReadDeadline(time.Now().Add(PongWait)); err != nil {
@@ -60,7 +60,7 @@ func (ws *WSConn) keepalive(close chan struct{}) {
 	}
 }
 
-// reader читает данные из WebSocket'a
+// reader reads data from WebSocket
 func (ws *WSConn) reader(timeout time.Duration) {
 	keepAliveStop := make(chan struct{})
 
@@ -86,14 +86,14 @@ func (ws *WSConn) reader(timeout time.Duration) {
 	}
 }
 
-// RunReader запускает процесс чтения данных из WebSocket'a
+// RunReader starts the process of reading data from WebSocket
 func (ws *WSConn) RunReader(wsTimeout time.Duration) <-chan []byte {
 	ws.readerCh = make(chan []byte, 256)
 	go ws.reader(wsTimeout)
 	return ws.readerCh
 }
 
-// SendMessage отправляет сообщение по WebSocket протоколу
+// SendMessage sends a message via WebSocket protocol
 func (ws *WSConn) SendMessage(msg string) error {
 	return ws.conn.WriteMessage(websocket.TextMessage, []byte(msg))
 }

@@ -1,6 +1,6 @@
 # Bitstamp API v2
 
-# Получение трейдов из Websocket
+# Receiving trades from Websocket
 ```go
 
 func Example() {

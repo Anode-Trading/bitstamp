@@ -193,8 +193,8 @@ func (pc *PrivateClient) CancelOrder(id string) (OrderCancelResult, error) {
 	return status, nil
 }
 
-// CancelAllOrders отменяет все ордера
-// TODO: bitstamp возвращает список отмененных ордеров. Сейчас они не парсятся.
+// CancelAllOrders cancels all orders
+// TODO: bitstamp returns a list of cancelled orders. They are not parsed at the moment.
 func (pc *PrivateClient) CancelAllOrders() (CancelAllOrdersResult, error) {
 	resp, err := pc.privateRequest("/api/v2/cancel_all_orders/", nil)
 	if err != nil {

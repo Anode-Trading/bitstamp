@@ -16,7 +16,7 @@ var ErrWSClientStopped = errors.New("ws client stopped")
 
 var errDoReconnect = errors.New("reconnect")
 
-// Websocket коннектор для Bitstamp для получение трейдов
+// Websocket connector for Bitstamp to receive trades
 type Websocket struct {
 	symbols []string
 	fills   chan Fill
@@ -30,7 +30,7 @@ const (
 	bitstampWS = "wss://ws.bitstamp.net/"
 )
 
-// NewWSClient Создает новый Websocket инстанс
+// NewWSClient Creates a new Websocket instance
 func NewWSClient(symbols ...string) *Websocket {
 	return &Websocket{
 		symbols: symbols,
@@ -73,7 +73,7 @@ func (ws *Websocket) subscribe(conn *WSConn, tokenData *GenerateWSTokenResult) e
 	return nil
 }
 
-// Run синхронная функция, которая подключается к Websocket'у, пересоздает connection в случае дисконекта
+// Run a synchronous function that connects to the Websocket, re-creates the connection in case of a disconnect
 func (ws *Websocket) Run(httpPrivateClient *PrivateClient, reconnectDelay time.Duration) error {
 	ws.stopMu.Lock()
 	select {
@@ -101,7 +101,7 @@ func (ws *Websocket) Run(httpPrivateClient *PrivateClient, reconnectDelay time.D
 	}
 }
 
-// Stop останавливает клиент и дожидается пока все сообщения в очереди обработаются
+// Stop stops the client and waits until all messages in the queue are processed
 func (ws *Websocket) Stop() {
 	ws.stopMu.Lock()
 	select {
@@ -116,7 +116,7 @@ func (ws *Websocket) Stop() {
 func (ws *Websocket) run(httpPrivateClient *PrivateClient) error {
 	ws.logger.Info("connecting")
 
-	// если connection не удался, то через reconnectDelay будет повторная попытка подключения
+	// if connection failed, then reconnectDelay will be used to retry connection
 	conn, err := ws.connect()
 	if err != nil {
 		ws.logger.WithError(err).Error("connection to websocket failed")
@@ -177,7 +177,7 @@ func (ws *Websocket) handleMessage(msg []byte) {
 	ws.fills <- parsedMsg
 }
 
-// Fill трейд, который получает клиент из библиотеки
+// Fill the trade that the client receives from the library
 type Fill struct {
 	OrderID  int64
 	TradeID  int64
@@ -189,7 +189,7 @@ type Fill struct {
 	FilledAt time.Time
 }
 
-// Fills возвращает канал
+// Fills returns the channel
 func (ws *Websocket) Fills() <-chan Fill {
 	return ws.fills
 }
